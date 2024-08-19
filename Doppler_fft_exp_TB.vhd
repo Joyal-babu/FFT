@@ -46,7 +46,8 @@ architecture Behavioral of Doppler_fft_exp_TB is
         DOPPLR_FFT        : integer                                -- Config data for FFT IP                    
         );
     Port ( 
-        clock             : in STD_LOGIC;
+        clk_125_p         : in STD_LOGIC;
+        clk_125_n         : in STD_LOGIC;
         reset             : in STD_LOGIC
         );
     end component;
@@ -57,12 +58,17 @@ architecture Behavioral of Doppler_fft_exp_TB is
     constant CONFIG_DATA       : std_logic_vector(15 downto 0) :=  "0000001101010101";               -- RAM Data Width 
     constant DOPPLR_FFT        : integer                       :=  512;                              -- Config data for FFT IP 
     
-    signal clock, reset : std_logic := '0';
+    signal clk_125_p, clk_125_n, reset : std_logic := '0';
 
 begin
 
-    clock        <= not clock  after 1.6666666655ns;
-    reset        <= '1', '0'   after 500ns;
+    reset <= '1', '0' after 500ns;
+
+    sys_clk_process : process
+    begin
+        clk_125_p <= '1'; clk_125_n <= '0'; wait for 4 ns;
+        clk_125_p <= '0'; clk_125_n <= '1'; wait for 4 ns;
+    end process;
 
     DUT : Doppler_fft_exp_TOP
         generic map(
@@ -73,7 +79,8 @@ begin
             DOPPLR_FFT     => DOPPLR_FFT       
         )
         port map(
-            clock          => clock,
+            clk_125_p      => clk_125_p,
+            clk_125_n      => clk_125_n,
             reset          => reset
         );
 
